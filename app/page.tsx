@@ -2,6 +2,8 @@
 
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
+import ToolsGrid from '@/components/ToolsGrid';
+import HowItWorksSection from '@/components/Work';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
@@ -11,6 +13,10 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <Hero/>
+
+      <ToolsGrid/>
+
+      <HowItWorksSection/>
 
       <main className="flex flex-1 px-6 py-12 gap-12 max-w-7xl mx-auto flex-col md:flex-row">
         {/* Add grid + tools content here */}
