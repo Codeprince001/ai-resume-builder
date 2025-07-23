@@ -8,10 +8,10 @@ export default function ToolsDropdownMenu() {
   return (
     <div
       className={cn(
-        "w-full sm:max-w-3xl bg-white shadow-xl rounded-lg p-4",
+        "w-full max-w-3xl mx-auto bg-white shadow-xl rounded-lg p-4",
         "grid grid-cols-1 sm:grid-cols-2 gap-4",
-        "border border-gray-200 absolute sm:relative mt-4 sm:mt-0",
-        "max-h-[80vh] overflow-y-auto scrollbar-hide z-50"
+        "border border-gray-200",
+        "max-h-[60vh] sm:max-h-[80vh] overflow-y-auto scrollbar-hide z-50"
       )}
     >
       {TOOL_CATEGORIES.map((category, idx) => (
