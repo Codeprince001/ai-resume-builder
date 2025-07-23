@@ -41,7 +41,7 @@ export default function TestimonialCarousel() {
                   alt={`${t.name} photo`}
                   className="w-20 h-20 rounded-full object-cover mb-4"
                 />
-                <p className="italic text-gray-700 mb-4">"{t.text}"</p>
+                <p className="italic text-gray-700 mb-4">&ldquo;{t.text}&rdquo;</p>
                 <p className="font-semibold text-gray-900">{t.name}</p>
                 <p className="text-sm text-gray-500">{t.role}</p>
               </motion.div>

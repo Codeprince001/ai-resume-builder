@@ -6,7 +6,6 @@ import Navbar from '@/components/Navbar';
 import TestimonialCarousel from '@/components/Testimonial';
 import ToolsGrid from '@/components/ToolsGrid';
 import HowItWorksSection from '@/components/Work';
-import { useRouter } from 'next/navigation';
 
 export default function Home() {
 
