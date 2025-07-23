@@ -3,7 +3,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TESTIMONIALS, Testimonial } from '@/constants/testimonials';
+import { TESTIMONIALS } from '@/constants/testimonials';
+import Image from 'next/image';
 
 const AUTO_PLAY_DELAY = 5000; // 5 seconds
 
@@ -35,7 +36,7 @@ export default function TestimonialCarousel() {
                 transition={{ duration: 0.5 }}
                 className="bg-white shadow-lg rounded-xl p-8 text-center flex flex-col items-center max-w-xl mx-auto"
               >
-                <img
+                <Image
                   src={t.photoUrl}
                   alt={`${t.name} photo`}
                   className="w-20 h-20 rounded-full object-cover mb-4"

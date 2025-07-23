@@ -12,19 +12,6 @@ export default function Navbar() {
   const router = useRouter();
   const [showTools, setShowTools] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [toolsMenuOpen, setToolsMenuOpen] = useState(false);
-
-  
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-    if (!mobileMenuOpen) setToolsMenuOpen(false); // Close tools if opening mobile menu
-  };
-
-  const toggleToolsMenu = () => {
-    setToolsMenuOpen(!toolsMenuOpen);
-    if (!toolsMenuOpen) setMobileMenuOpen(false); // Close mobile menu if opening tools
-  };
-
 
   return (
     <>

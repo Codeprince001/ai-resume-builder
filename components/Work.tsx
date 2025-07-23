@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FaUpload, FaTools, FaRobot, FaDownload } from 'react-icons/fa';
 import { steps } from '@/constants/steps';
 
 
