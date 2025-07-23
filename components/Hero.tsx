@@ -45,13 +45,13 @@ export default function Hero() {
         >
           <button
             onClick={() => router.push('/signup')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-6 py-3 rounded-md md:text-lg text-sm  font-semibold hover:bg-blue-700 transition"
           >
             Start Free Trial
           </button>
           <button
             onClick={() => router.push('/dashboard')}
-            className="border border-blue-600 text-blue-600 px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-100 transition"
+            className="border border-blue-600 text-blue-600 px-6 py-3 rounded-md md:text-lg text-sm font-semibold hover:bg-blue-100 transition"
           >
             Explore Tools
           </button>
