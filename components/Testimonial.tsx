@@ -39,6 +39,8 @@ export default function TestimonialCarousel() {
                 <Image
                   src={t.photoUrl}
                   alt={`${t.name} photo`}
+                  width={48}
+                  height={48}
                   className="w-20 h-20 rounded-full object-cover mb-4"
                 />
                 <p className="italic text-gray-700 mb-4">&ldquo;{t.text}&rdquo;</p>

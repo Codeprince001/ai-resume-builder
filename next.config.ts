@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
     domains: [
       "mockuphone.com",
       "upload.wikimedia.org",
-      "developer.apple.com"
+      "developer.apple.com",
+      "randomuser.me"
     ],
   }
 };
