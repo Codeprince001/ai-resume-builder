@@ -1,7 +1,6 @@
 'use client';
 
 import { FAQSection } from '@/components/FAQ';
-import { Footer } from '@/components/Footer';
 import Hero from '@/components/Hero';
 import { GetItOnMobile } from '@/components/MobileApp';
 import Navbar from '@/components/Navbar';
@@ -28,8 +27,6 @@ export default function Home() {
       <Pricing/>
 
       <FAQSection/>
-
-      <Footer/>
 
       <main className="flex flex-1 px-6 py-12 gap-12 max-w-7xl mx-auto flex-col md:flex-row">
         {/* Add grid + tools content here */}
