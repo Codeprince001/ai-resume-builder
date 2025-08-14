@@ -1,4 +1,4 @@
 export const NAV_LINKS = [
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Login', href: '/login' },
+  { label: 'Sign-in', href: '/sign-in' },
 ];
