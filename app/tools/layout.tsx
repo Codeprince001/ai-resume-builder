@@ -1,5 +1,5 @@
+import DashboardNavbar from '@/components/DashboardNav';
 import Sidebar from '@/components/sidebar';
-import DashboardNav from '@/components/DashboardNav';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -18,13 +18,16 @@ export const metadata: Metadata = {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
 
-      <main className="ml-64 w-full p-4 md:p-8">
-        <DashboardNav />
-        {children}
-      </main>
+      <div className="ml-20 flex-1 flex flex-col">
+        <DashboardNavbar />
+        
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

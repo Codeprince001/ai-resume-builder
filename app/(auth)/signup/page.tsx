@@ -1,96 +1,80 @@
 'use client';
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
-import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineCheck } from "react-icons/ai";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function SignUpPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
-  const passwordRequirements = [
-    { text: "At least 8 characters", met: formData.password.length >= 8 },
-    { text: "Contains uppercase letter", met: /[A-Z]/.test(formData.password) },
-    { text: "Contains lowercase letter", met: /[a-z]/.test(formData.password) },
-    { text: "Contains number", met: /\d/.test(formData.password) },
-  ];
-
-  const isPasswordValid = passwordRequirements.every(req => req.met);
-  const doPasswordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword !== "";
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    setError("");
-  };
+  // Debug and redirect if already authenticated
+  useEffect(() => {
+    console.log("🔍 Signup Session Debug:", { session, status });
+    
+    if (status === "authenticated" && session) {
+      console.log("✅ User already authenticated, redirecting to tools");
+      router.push("/tools");
+    }
+  }, [session, status, router]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Validation
-    if (!isPasswordValid) {
-      setError("Please meet all password requirements");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!doPasswordsMatch) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
+    console.log("🚀 Starting registration process...");
 
     try {
-      const response = await fetch("/api/auth/register", {
+      // First, register the user
+      const registerRes = await fetch("/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
       });
 
-      const data = await response.json();
+      const registerData = await registerRes.json();
+      console.log("📋 Registration response:", registerData);
 
-      if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
+      if (!registerRes.ok) {
+        setError(registerData.error || "Registration failed");
+        return;
       }
 
-      setSuccess(true);
+      // If registration successful, automatically sign in the user
+      console.log("✅ Registration successful, signing in...");
       
-      // Auto sign-in after successful registration
-      setTimeout(async () => {
-        const res = await signIn("credentials", {
-          redirect: false,
-          email: formData.email,
-          password: formData.password,
-        });
+      const signInRes = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-        if (res?.ok) {
-          router.push("/dashboard");
-        }
-      }, 2000);
+      console.log("📋 Auto sign-in response:", signInRes);
 
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      if (signInRes?.error) {
+        setError("Registration successful but sign-in failed. Please try signing in manually.");
+      } else if (signInRes?.ok) {
+        console.log("✅ Auto sign-in successful, redirecting...");
+        // Give some time for session to update
+        setTimeout(() => {
+          router.push("/tools");
+        }, 100);
+      }
+    } catch (err) {
+      console.error("❌ Registration exception:", err);
+      setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -98,38 +82,42 @@ export default function SignUpPage() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    console.log("🔗 Starting Google sign-in...");
+    
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: "/tools" });
     } catch (err) {
+      console.error("❌ Google sign-in error:", err);
       setError("Google sign-in failed. Please try again.");
       setIsLoading(false);
     }
   };
 
-  if (success) {
+  // Show loading state while session is being determined
+  if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AiOutlineCheck className="text-green-600 text-2xl" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h1>
-          <p className="text-gray-600 mb-4">Your account has been created successfully. Signing you in...</p>
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-2xl shadow-xl">
+          <div className="text-center">Loading...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600">Join us to get started</p>
+          <p className="text-gray-600">Sign up for a new account</p>
         </div>
+
+        {/* Debug Info (remove in production) */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+            <strong>Debug:</strong> Status: {status}, Session: {session ? "exists" : "null"}
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -137,7 +125,7 @@ export default function SignUpPage() {
           </div>
         )}
 
-        {/* Google Sign Up Button */}
+        {/* Google Sign In Button */}
         <button
           type="button"
           onClick={handleGoogleSignIn}
@@ -164,11 +152,10 @@ export default function SignUpPage() {
             </label>
             <input
               id="name"
-              name="name"
               type="text"
               placeholder="Enter your full name"
-              value={formData.name}
-              onChange={handleInputChange}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               required
               disabled={isLoading}
@@ -181,11 +168,10 @@ export default function SignUpPage() {
             </label>
             <input
               id="email"
-              name="email"
               type="email"
               placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleInputChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               required
               disabled={isLoading}
@@ -199,11 +185,10 @@ export default function SignUpPage() {
             <div className="relative">
               <input
                 id="password"
-                name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={handleInputChange}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
                 disabled={isLoading}
@@ -216,58 +201,14 @@ export default function SignUpPage() {
                 {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
               </button>
             </div>
-            
-            {formData.password && (
-              <div className="mt-2 space-y-1">
-                {passwordRequirements.map((req, index) => (
-                  <div key={index} className={`flex items-center text-xs ${req.met ? 'text-green-600' : 'text-gray-400'}`}>
-                    <div className={`w-3 h-3 rounded-full mr-2 flex items-center justify-center ${req.met ? 'bg-green-100' : 'bg-gray-100'}`}>
-                      {req.met && <AiOutlineCheck size={8} />}
-                    </div>
-                    {req.text}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                required
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-              >
-                {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
-              </button>
-            </div>
-            {formData.confirmPassword && (
-              <div className={`mt-1 text-xs flex items-center ${doPasswordsMatch ? 'text-green-600' : 'text-red-500'}`}>
-                <div className={`w-3 h-3 rounded-full mr-2 flex items-center justify-center ${doPasswordsMatch ? 'bg-green-100' : 'bg-red-100'}`}>
-                  {doPasswordsMatch && <AiOutlineCheck size={8} />}
-                </div>
-                {doPasswordsMatch ? 'Passwords match' : 'Passwords do not match'}
-              </div>
-            )}
+            <p className="text-xs text-gray-500 mt-1">
+              Must be at least 8 characters with uppercase, lowercase, and number
+            </p>
           </div>
 
           <button
             type="submit"
-            disabled={isLoading || !isPasswordValid || !doPasswordsMatch}
+            disabled={isLoading}
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Creating Account..." : "Create Account"}

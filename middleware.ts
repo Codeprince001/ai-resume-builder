@@ -1,28 +1,50 @@
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
+import { getToken } from "next-auth/jwt"
 import { auth } from "@/auth"
 
-export default auth((req) => {
+const protectedRoutes = ["/tools", "/profile", "/settings"]
+const authPages = ["/signin", "/signup", "/forgot-password"]
+
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req
-  const isAuthPage = nextUrl.pathname.startsWith("/signin")
+  const pathname = nextUrl.pathname
+  const isRoot = nextUrl.pathname === "/"
+  
+  // Get the JWT token instead of using auth() to avoid Prisma in Edge Runtime
+  const token = await getToken({ 
+    req, 
+    secret: process.env.AUTH_SECRET 
+  })
+  
+  const isAuthenticated = !!token
+  
 
-  // if (!req.auth && !isAuthPage) {
-  //   // Not signed in, trying to access protected page
-  //   return NextResponse.redirect(new URL("/signin", req.url))
-  // }
+  const isProtected = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  )
+  const isAuthPage = authPages.some((route) => pathname.startsWith(route))
 
-  // if (req.auth && isAuthPage) {
-  //   // Signed in, but trying to access /signin
-  //   return NextResponse.redirect(new URL("/dashboard", req.url))
-  // }
+  if (isAuthenticated && isRoot) {
+    // Signed in → always land on tools
+    return NextResponse.redirect(new URL("/tools", req.url))
+  }
+
+  // If user is not signed in and is trying to access a protected page
+  if (!isAuthenticated && isProtected) {
+    return NextResponse.redirect(new URL("/signin", req.url))
+  }
+
+  // If user is signed in and is trying to access an auth page
+  if (isAuthenticated && isAuthPage) {
+    return NextResponse.redirect(new URL("/tools", req.url))
+  }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/profile/:path*",
-    "/settings/:path*",
-    "/signin",
+    // Exclude API routes, static files, and NextAuth internal routes
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 }

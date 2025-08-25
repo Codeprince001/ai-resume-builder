@@ -30,7 +30,7 @@ export default function SignInPage() {
       if (res?.error) {
         setError("Invalid email or password");
       } else if (res?.ok) {
-        router.push("/dashboard");
+        router.push("/tools");
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -42,7 +42,7 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: "/tools" });
     } catch (err) {
       setError("Google sign-in failed. Please try again.");
       setIsLoading(false);

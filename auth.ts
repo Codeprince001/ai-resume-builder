@@ -1,4 +1,4 @@
-// auth.ts - More reliable approach for profile creation
+// auth.ts - Fixed configuration
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -23,7 +23,6 @@ async function ensureProfileExists(userId: string, userEmail: string) {
     });
 
     if (!existingProfile) {
-      console.log("📝 Creating profile for user:", userId);
       
       const profile = await prisma.profile.create({
         data: {
@@ -33,14 +32,11 @@ async function ensureProfileExists(userId: string, userEmail: string) {
         },
       });
       
-      console.log("✅ Profile created successfully:", profile.id);
       return profile;
     } else {
-      console.log("👤 Profile already exists for user:", userId);
       return existingProfile;
     }
   } catch (error) {
-    console.error("❌ Profile creation error:", error);
     throw error;
   }
 }
@@ -54,26 +50,41 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password", placeholder: "*****" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+    
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
 
         try {
           const user = await prisma.user.findUnique({
             where: { email: credentials.email as string },
           });
 
-          if (!user || !user.password) return null;
+          console.log("👤 User found:", { 
+            userId: user?.id,
+            email: user?.email,
+            hasPassword: !!user?.password 
+          });
+
+          if (!user || !user.password) {
+            return null;
+          }
 
           const isValid = await bcrypt.compare(credentials.password as string, user.password);
-          if (!isValid) return null;
 
-          return {
+          if (!isValid) {
+            return null;
+          }
+
+          const returnUser = {
             id: user.id,
             email: user.email,
             name: user.name,
             image: user.image,
           };
+
+          return returnUser;
         } catch (error) {
-          console.error("Authorization error:", error);
           return null;
         }
       },
@@ -84,8 +95,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   
+  // Use JWT sessions for middleware compatibility
   session: {
-    strategy: "database",
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   
@@ -93,73 +105,77 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log("🚀 SignIn callback:", { 
-        userId: user.id,
-        email: user.email,
-        provider: account?.provider
-      });
 
-      try {
-        // Always ensure profile exists on every sign-in
-        await ensureProfileExists(user.id!, user.email!);
-        return true;
-      } catch (error) {
-        console.error("❌ SignIn callback error:", error);
-        // You can choose to return false here to prevent sign-in if profile creation fails
-        return true;
-      }
+      // Don't create profile here - let the createUser event handle it
+      // Just return true to allow sign-in
+      return true;
     },
 
-    async session({ session, user }) {
-      console.log("📋 Session callback:", {
-        sessionUserId: session.user?.id,
-        dbUserId: user?.id
-      });
+    // JWT callback with better user ID handling
+    async jwt({ token, user, account, profile, trigger }) {
+ 
       
-      if (session.user && user) {
-        session.user.id = user.id;
+      // During initial sign in, user object will be available
+      if (user) {
+        token.id = user.id;
+        token.userId = user.id; // Add backup field
+      }
+      
+      // Ensure we always have a user ID in the token
+      if (!token.id && token.sub) {
+        token.id = token.sub;
+      }
+      
+      return token;
+    },
+
+    async session({ session, token }) {
+
+      
+      if (session.user && token) {
+        // Try multiple fallbacks for user ID
+        const userId = token.id || token.userId || token.sub;
+        session.user.id = userId as string;
       }
       return session;
     },
 
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    // Fixed redirect callback
+    async redirect({ url, baseUrl }) {
+      
+      // If the URL is trying to redirect to auth pages, redirect to tools instead
+      if (url.includes('/signin') || url.includes('/signup') || url.includes('/auth')) {
+        return `${baseUrl}/tools`;
       }
-      return token;
+      
+      // Handle relative URLs
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      
+      // Handle same-origin URLs
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      
+      // Default to tools for external URLs
+      return `${baseUrl}/tools`;
     },
   },
   
   events: {
-    // This event fires when a new user is created
     async createUser({ user }) {
-      console.log("🆕 New user created event:", user.id, user.email);
       
       try {
-        // Create profile immediately when user is created
         await ensureProfileExists(user.id, user.email!);
       } catch (error) {
         console.error("❌ Error in createUser event:", error);
       }
     },
-    
-    async signIn({ user, account, profile, isNewUser }) {
-      console.log("🔐 SignIn event:", {
-        userId: user.id,
-        provider: account?.provider,
-        isNewUser
-      });
-    },
-
-    async session({ session, token }) {
-      console.log("📋 Session event:", {
-        userId: session.user?.id || token.id
-      });
-    },
   },
   
   pages: {
-    signIn: "/auth/signin",
+    signIn: "/signin",
     error: "/auth/error",
   },
   
