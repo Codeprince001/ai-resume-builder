@@ -99,7 +99,7 @@ finally {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email!</h1>
           <p className="text-gray-600 mb-6">
-            We've sent a 6-digit verification code to your email address. 
+            We&apos;ve sent a 6-digit verification code to your email address. 
             The code will expire in 10 minutes.
           </p>
           

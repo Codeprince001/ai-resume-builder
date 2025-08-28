@@ -45,7 +45,7 @@ export default function SignInPage() {
     setIsLoading(true);
     try {
       await signIn("google", { callbackUrl: "/tools" });
-    } catch (err) {
+    } catch  {
       setError("Google sign-in failed. Please try again.");
       setIsLoading(false);
     }
