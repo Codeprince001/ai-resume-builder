@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -15,8 +15,29 @@ import {
   FiCheck 
 } from "react-icons/fi";
 
+// Loading component for Suspense fallback
+function ResetPasswordLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded mb-4"></div>
+          <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+          <div className="h-8 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded mb-8"></div>
+          <div className="space-y-4">
+            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-export default function ResetPasswordPage() {
+// Main component that uses useSearchParams
+function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -70,13 +91,12 @@ export default function ResetPasswordPage() {
       }, 3000);
 
     } catch (err: unknown) {
-  if (err instanceof Error) {
-    setError(err.message || "Password reset failed. Please try again.");
-  } else {
-    setError("Password reset failed. Please try again.");
-  }
-}
- finally {
+      if (err instanceof Error) {
+        setError(err.message || "Password reset failed. Please try again.");
+      } else {
+        setError("Password reset failed. Please try again.");
+      }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -150,9 +170,8 @@ export default function ResetPasswordPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Reset Your Password</h1>
           <p className="text-gray-600">
-  Enter your new password below. Make sure it&apos;s strong and secure.
-</p>
-
+            Enter your new password below. Make sure it&apos;s strong and secure.
+          </p>
         </div>
 
         {error && (
@@ -256,5 +275,14 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main exported component with Suspense wrapper
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordLoading />}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
