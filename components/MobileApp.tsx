@@ -1,5 +1,5 @@
 import Image from "next/image";
-import mobileApp from "@/images/mobile-view.png";
+import mobileApp from "@/public/images/mobile-view.png";
 
 export const GetItOnMobile = () => {
   return (
