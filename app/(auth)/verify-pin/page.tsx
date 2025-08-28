@@ -104,13 +104,18 @@ export default function VerifyPinPage() {
       // Redirect to reset password with token
       router.push(`/reset-password?token=${result.token}`);
 
-    } catch (err: any) {
-      setError(err.message || "PIN verification failed. Please try again.");
-      // Clear PIN on error
-      setPin(["", "", "", "", "", ""]);
-      setValue("pin", "");
-      inputRefs.current[0]?.focus();
-    } finally {
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message || "PIN verification failed. Please try again.");
+  } else {
+    setError("PIN verification failed. Please try again.");
+  }
+  // Clear PIN on error
+  setPin(["", "", "", "", "", ""]);
+  setValue("pin", "");
+  inputRefs.current[0]?.focus();
+}
+finally {
       setIsLoading(false);
     }
   };
@@ -141,9 +146,14 @@ export default function VerifyPinPage() {
       setValue("pin", "");
       inputRefs.current[0]?.focus();
 
-    } catch (err: any) {
-      setError(err.message || "Failed to resend code. Please try again.");
-    } finally {
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message || "Failed to resend code. Please try again.");
+  } else {
+    setError("Failed to resend code. Please try again.");
+  }
+}
+ finally {
       setIsLoading(false);
     }
   };
@@ -247,7 +257,8 @@ export default function VerifyPinPage() {
 
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
-            Didn't receive the code? Check your spam folder or{" "}
+  Didn&apos;t receive the code? Check your spam folder or{" "}
+
             <Link 
               href="/forgot-password" 
               className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer hover:underline"

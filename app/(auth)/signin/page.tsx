@@ -32,9 +32,11 @@ export default function SignInPage() {
       } else if (res?.ok) {
         router.push("/tools");
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-    } finally {
+    } catch {
+  setError("Google sign-in failed. Please try again.");
+  setIsLoading(false);
+}
+ finally {
       setIsLoading(false);
     }
   };
@@ -136,7 +138,7 @@ export default function SignInPage() {
 
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Don't have an account?{" "}
+  Don&apos;t have an account?{" "}
             <Link 
               href="/signup" 
               className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer hover:underline"

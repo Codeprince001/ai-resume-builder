@@ -66,9 +66,14 @@ export default function ForgotPasswordPage() {
         router.push(`/verify-pin?email=${encodeURIComponent(data.email)}`);
       }, 3000);
 
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
-    } finally {
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message || "Something went wrong. Please try again.");
+  } else {
+    setError("Something went wrong. Please try again.");
+  }
+}
+finally {
       setIsLoading(false);
     }
   };
@@ -151,7 +156,7 @@ export default function ForgotPasswordPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Forgot Password?</h1>
           <p className="text-gray-600">
-            Don't worry! Enter your email address and we'll send you a verification code to reset your password.
+            Don&apos;t worry! Enter your email address and we will send you a verification code to reset your password.
           </p>
         </div>
 

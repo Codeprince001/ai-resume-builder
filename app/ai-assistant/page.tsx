@@ -2,8 +2,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, User, Bot, Copy, Check, Square } from "lucide-react";
 
+type ChatMessage = {
+  role: "USER" | "AI";
+  text: string;
+  id?: string;
+};
+
 // Simple markdown parser for basic formatting
-const parseMarkdown = (text: string) => {
+const parseMarkdown = (text: string): string => {
   return text
     // Headers
     .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>')
@@ -27,7 +33,7 @@ const parseMarkdown = (text: string) => {
     .replace(/\n/g, '<br />');
 };
 
-const MessageBubble = ({ message, isUser, isStreaming }: { message: any; isUser: boolean; isStreaming?: boolean }) => {
+const MessageBubble = ({ message, isUser, isStreaming }: { message: ChatMessage; isUser: boolean; isStreaming?: boolean }) => {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async () => {
@@ -109,7 +115,7 @@ const TypingIndicator = () => (
 
 export default function ChatAssistant() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ role: string; text: string; id?: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [stopStreaming, setStopStreaming] = useState(false);
@@ -172,14 +178,13 @@ export default function ChatAssistant() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage = { role: "USER", text: input.trim(), id: Date.now().toString() };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage = { role: "USER" as const, text: input.trim(), id: Date.now().toString() };    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
     // Create placeholder message for streaming
     const botMessageId = (Date.now() + 1).toString();
-    const botMessage = { role: "AI", text: "", id: botMessageId };
+    const botMessage  = { role: "AI" as const,   text: "", id: (Date.now() + 1).toString() };
     setMessages((prev) => [...prev, botMessage]);
     setStreamingMessageId(botMessageId);
 
@@ -196,10 +201,10 @@ export default function ChatAssistant() {
         // Start typewriter effect
         typewriterEffect(data.data, botMessageId);
       } else {
-        const errorText = `Sorry, I encountered an error: ${data.error || 'Unknown error'}`;
+        const errorText = `"Sorry, I encountered an error: ${data.error || 'Unknown error'}`;
         typewriterEffect(errorText, botMessageId);
       }
-    } catch (error) {
+    } catch {
       const errorText = "Sorry, I'm having trouble connecting. Please try again.";
       typewriterEffect(errorText, botMessageId);
     } finally {
@@ -237,7 +242,7 @@ export default function ChatAssistant() {
             <div className="text-center">
               <Bot size={48} className="mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium mb-2">How can I help you today?</p>
-              <p className="text-sm">Ask me anything - I'm here to assist!</p>
+              <p className="text-sm">Ask me anything - I&apos;m here to assist!</p>
             </div>
           </div>
         )}

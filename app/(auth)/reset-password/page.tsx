@@ -69,9 +69,14 @@ export default function ResetPasswordPage() {
         router.push("/signin?message=Password reset successfully. Please sign in with your new password.");
       }, 3000);
 
-    } catch (err: any) {
-      setError(err.message || "Password reset failed. Please try again.");
-    } finally {
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message || "Password reset failed. Please try again.");
+  } else {
+    setError("Password reset failed. Please try again.");
+  }
+}
+ finally {
       setIsLoading(false);
     }
   };
@@ -145,8 +150,9 @@ export default function ResetPasswordPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Reset Your Password</h1>
           <p className="text-gray-600">
-            Enter your new password below. Make sure it's strong and secure.
-          </p>
+  Enter your new password below. Make sure it&apos;s strong and secure.
+</p>
+
         </div>
 
         {error && (

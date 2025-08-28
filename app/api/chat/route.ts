@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { GenerativeAiInferenceClient, models, requests } from "oci-generativeaiinference";
 import { SimpleAuthenticationDetailsProvider } from "oci-common";
 
+type OciError = Error & {
+  statusCode?: number;
+  serviceCode?: string;
+  opcRequestId?: string;
+};
+
 
 const COMPARTMENT_ID = "ocid1.compartment.oc1..aaaaaaaajazxauqz347rt3xrux54gwm53lj3bvnurwrkrnw2nf4zdzqn5nia";
 const ENDPOINT = "https://inference.generativeai.us-ashburn-1.oci.oraclecloud.com";
@@ -67,19 +73,19 @@ export async function POST(req: Request) {
       data: responseText,
     });
     
-  } catch (error: any) {
-    console.error("Oracle AI Error Details:", {
-      message: error.message,
-      statusCode: error.statusCode,
-      serviceCode: error.serviceCode,
-      opcRequestId: error.opcRequestId,
-      stack: error.stack
-    });
-    
-    return NextResponse.json({ 
-      error: "Failed to get response",
-      details: error.message,
-      statusCode: error.statusCode 
-    }, { status: 500 });
-  }
+  } catch (err: unknown) {
+  const error = err as OciError;
+  console.error("Oracle AI Error Details:", {
+    message: error.message,
+    statusCode: error.statusCode,
+    serviceCode: error.serviceCode,
+    opcRequestId: error.opcRequestId,
+    stack: error.stack,
+  });
+
+  return NextResponse.json(
+    { error: "Failed to get response", details: error.message },
+    { status: 500 }
+  );
+}
 }
