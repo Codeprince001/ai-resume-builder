@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -8,7 +8,31 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { IoArrowBack, IoShield, IoRefresh, IoTime } from 'react-icons/io5';
 import { verifyPinSchema, VerifyPinInput } from "@/lib/validations/auth";
 
-export default function VerifyPinPage() {
+// Loading component for Suspense fallback
+function VerifyPinLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded mb-6"></div>
+          <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+          <div className="h-8 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded mb-8"></div>
+          <div className="flex justify-center space-x-2 mb-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+          <div className="h-12 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main component that uses useSearchParams
+function VerifyPinForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [pin, setPin] = useState(["", "", "", "", "", ""]);
@@ -105,17 +129,16 @@ export default function VerifyPinPage() {
       router.push(`/reset-password?token=${result.token}`);
 
     } catch (err: unknown) {
-  if (err instanceof Error) {
-    setError(err.message || "PIN verification failed. Please try again.");
-  } else {
-    setError("PIN verification failed. Please try again.");
-  }
-  // Clear PIN on error
-  setPin(["", "", "", "", "", ""]);
-  setValue("pin", "");
-  inputRefs.current[0]?.focus();
-}
-finally {
+      if (err instanceof Error) {
+        setError(err.message || "PIN verification failed. Please try again.");
+      } else {
+        setError("PIN verification failed. Please try again.");
+      }
+      // Clear PIN on error
+      setPin(["", "", "", "", "", ""]);
+      setValue("pin", "");
+      inputRefs.current[0]?.focus();
+    } finally {
       setIsLoading(false);
     }
   };
@@ -147,13 +170,12 @@ finally {
       inputRefs.current[0]?.focus();
 
     } catch (err: unknown) {
-  if (err instanceof Error) {
-    setError(err.message || "Failed to resend code. Please try again.");
-  } else {
-    setError("Failed to resend code. Please try again.");
-  }
-}
- finally {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to resend code. Please try again.");
+      } else {
+        setError("Failed to resend code. Please try again.");
+      }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -199,7 +221,7 @@ finally {
                   key={index}
                   ref={(el) => {
                     inputRefs.current[index] = el;
-                    }}
+                  }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
@@ -257,8 +279,7 @@ finally {
 
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
-  Didn&apos;t receive the code? Check your spam folder or{" "}
-
+            Didn&apos;t receive the code? Check your spam folder or{" "}
             <Link 
               href="/forgot-password" 
               className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer hover:underline"
@@ -269,5 +290,14 @@ finally {
         </div>
       </div>
     </div>
-  )
+  );
+}
+
+// Main exported component with Suspense wrapper
+export default function VerifyPinPage() {
+  return (
+    <Suspense fallback={<VerifyPinLoading />}>
+      <VerifyPinForm />
+    </Suspense>
+  );
 }
