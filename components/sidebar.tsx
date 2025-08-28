@@ -4,10 +4,6 @@ import { sidebarItems } from '@/constants/sidebarItems';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  FiZap, 
-  FiBriefcase, 
-  FiBarChart2, 
-  FiLayout,
   FiUser
 } from 'react-icons/fi';
 

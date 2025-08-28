@@ -1,5 +1,7 @@
 // lib/email.ts
 import nodemailer from 'nodemailer';
+import crypto from "crypto";
+
 
 // Create transporter with more explicit Gmail configuration
 const transporter = nodemailer.createTransport({
@@ -109,27 +111,13 @@ export async function sendPasswordResetEmail(email: string, pin: string, userNam
   };
 
   try {
-    console.log('📧 Attempting to send email to:', email);
-    console.log('📧 From:', process.env.EMAIL_FROM);
-    console.log('📧 PIN:', pin);
-    
+
     const info = await transporter.sendMail(mailOptions);
-    
-    console.log('✅ Email sent successfully!');
-    console.log('📧 Message ID:', info.messageId);
-    console.log('📧 Response:', info.response);
-    
+
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Email sending failed:', error);
-    
-    // More detailed error logging
-    if (error instanceof Error) {
-      console.error('Error name:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
-    
+
     return { success: false, error: 'Failed to send email' };
   }
 }
@@ -140,9 +128,11 @@ export function generatePin(): string {
 }
 
 // Utility function to generate secure token
+// Utility function to generate secure token
 export function generateResetToken(): string {
-  return require('crypto').randomBytes(32).toString('hex');
+  return crypto.randomBytes(32).toString("hex");
 }
+
 
 // Test function to send a test email (for debugging)
 export async function sendTestEmail(toEmail: string) {

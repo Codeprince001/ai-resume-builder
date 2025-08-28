@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { FiHome,  FiSettings, FiHelpCircle, FiLogOut } from 'react-icons/fi';
+import Image from 'next/image';
 
 export default function DashboardNavbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -68,10 +69,12 @@ export default function DashboardNavbar() {
             className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
           >
             {session?.user?.image ? (
-              <img
+              <Image
                 src={session.user.image}
                 alt={session.user.name || 'User'}
-                className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                width={32}
+                height={32}
+                className="rounded-full object-cover border-2 border-gray-200"
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">
