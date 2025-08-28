@@ -91,15 +91,15 @@ export default function DashboardNavbar() {
                 <div className="flex items-center space-x-3">
                   {session?.user?.image ? (
                     <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'User'}
-                      className="rounded-full object-cover"
-                      width={40}
-                      height={40}
+                      src={session.user.image || "/default-avatar.png"} // fallback
+                      alt={session.user.name || "User"}
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover border-2 border-gray-200"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">
-                      {session?.user?.name ? getInitials(session.user.name) : 'U'}
+                    <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">
+                      {session?.user?.name ? getInitials(session.user.name) : "U"}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">

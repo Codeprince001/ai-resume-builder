@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
       "mockuphone.com",
       "upload.wikimedia.org",
       "developer.apple.com",
-      "randomuser.me"
+      "randomuser.me",
+      "lh3.googleusercontent.com",
     ],
   }
 };
