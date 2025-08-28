@@ -57,7 +57,7 @@ export async function POST(req: Request) {
               content: [
                 {
                   type: "TEXT",
-                  // @ts-ignore
+                  // @ts-expect-error
                   text: message,
                 },
               ],
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     console.log("Response received:", JSON.stringify(response, null, 2));
 
     // Safely extract response text
-    // @ts-ignore
+    // @ts-expect-error
     const chatResponse = response?.chatResult;
     if (!chatResponse || !chatResponse.chatResponse?.choices?.length) {
       throw new Error("Invalid or empty response from Oracle AI");
