@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 // app/api/chat/route.ts
 import { NextResponse } from "next/server";
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
               content: [
                 {
                   type: "TEXT",
-                  // @ts-expect-error
+                  // @ts-expect-error Oracle SDK type definition does not include `text` but runtime requires it
                   text: message,
                 },
               ],
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     console.log("Response received:", JSON.stringify(response, null, 2));
 
     // Safely extract response text
-    // @ts-expect-error
+    // @ts-expect-error Oracle SDK typings are incomplete for chat responses
     const chatResponse = response?.chatResult;
     if (!chatResponse || !chatResponse.chatResponse?.choices?.length) {
       throw new Error("Invalid or empty response from Oracle AI");
