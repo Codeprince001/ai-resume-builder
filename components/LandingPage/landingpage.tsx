@@ -6,11 +6,13 @@ import TestimonialCarousel from '../Testimonial'
 import { GetItOnMobile } from '../MobileApp'
 import Pricing from '../Pricing'
 import { FAQSection } from '../FAQ'
+import ChatWidget from '../ai-assistant'
 
 const Landingpage = () => {
   return (
      <div className="min-h-screen flex flex-col">
       <Hero />
+      <ChatWidget/>
       <ToolsGrid />
       <HowItWorksSection />
       <TestimonialCarousel />
